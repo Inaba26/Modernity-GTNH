@@ -2,5 +2,8 @@
   "pack": {
     "pack_format": 1,
     "description": "§bModernity-GTNH-v1.5.6"
+  },
+  "myctmlib": {
+    "enableBeeJsonModels": true
   }
 }
