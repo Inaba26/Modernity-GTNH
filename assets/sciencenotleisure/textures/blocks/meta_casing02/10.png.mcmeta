@@ -1,0 +1,9 @@
+{
+  "animation": {
+    "interpolate": true,
+    "frametime": 2
+  },
+  "myctmlib": {
+    "connection": "sciencenotleisure:meta_casing02/10_ctm"
+  }
+}
