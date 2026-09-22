@@ -1,0 +1,79 @@
+name: Build 2.9.X Resource Pack
+
+on:
+  push:
+    branches:
+      - 2.9.X
+    paths:
+      - 'assets/**'
+      - 'MyCTMLib.cfg'
+      - 'pack.mcmeta'
+      - 'pack.png'
+      - 'README.md'
+      - '.github/workflows/build-2.9.x.yml'
+  pull_request:
+    branches:
+      - 2.9.X
+    paths:
+      - 'assets/**'
+      - 'MyCTMLib.cfg'
+      - 'pack.mcmeta'
+      - 'pack.png'
+      - 'README.md'
+      - '.github/workflows/build-2.9.x.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Package Modernity-GTNH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build resource pack
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          output_dir="build"
+          package_root="$output_dir/Modernity-GTNH"
+          zip_name="Modernity-GTNH-2.9.X-${GITHUB_SHA::7}.zip"
+
+          rm -rf "$output_dir"
+          mkdir -p "$package_root"
+
+          for path in assets MyCTMLib.cfg pack.mcmeta pack.png README.md; do
+            if [[ -e "$path" ]]; then
+              cp -a --parents "$path" "$package_root/"
+            fi
+          done
+
+          [[ -f "$package_root/pack.mcmeta" ]] || {
+            echo "pack.mcmeta is required for a resource pack." >&2
+            exit 1
+          }
+
+          [[ -d "$package_root/assets" ]] || {
+            echo "assets/ is required for a resource pack." >&2
+            exit 1
+          }
+
+          (
+            cd "$package_root"
+            zip -r "../$zip_name" .
+          )
+
+          echo "PACKAGE_PATH=$output_dir/$zip_name" >> "$GITHUB_ENV"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Modernity-GTNH-2.9.X-${{ github.sha }}
+          path: ${{ env.PACKAGE_PATH }}
+          if-no-files-found: error
+          retention-days: 14
